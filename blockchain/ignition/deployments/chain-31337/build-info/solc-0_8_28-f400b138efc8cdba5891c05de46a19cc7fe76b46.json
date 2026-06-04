@@ -1,0 +1,49 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_28-f400b138efc8cdba5891c05de46a19cc7fe76b46",
+  "solcVersion": "0.8.28",
+  "solcLongVersion": "0.8.28+commit.7893614a",
+  "compilerType": "solc",
+  "toolVersions": {
+    "hardhat": "3.4.5"
+  },
+  "userSourceNameMap": {
+    "contracts/DocumentRegistry.sol": "project/contracts/DocumentRegistry.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "cancun",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode.linkReferences",
+            "evm.bytecode.object",
+            "evm.bytecode.opcodes",
+            "evm.bytecode.sourceMap",
+            "evm.deployedBytecode.immutableReferences",
+            "evm.deployedBytecode.linkReferences",
+            "evm.deployedBytecode.object",
+            "evm.deployedBytecode.opcodes",
+            "evm.deployedBytecode.sourceMap",
+            "evm.methodIdentifiers"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/DocumentRegistry.sol": {
+        "content": "// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.28;\r\n\r\ncontract DocumentRegistry {\r\n\r\n    struct Document {\r\n        bool exists;\r\n        address owner;\r\n        uint256 timestamp;\r\n    }\r\n\r\n    mapping(string => Document) private documents;\r\n\r\n    function registerDocument(\r\n        string memory _fileHash\r\n    ) public {\r\n\r\n        require(\r\n            !documents[_fileHash].exists,\r\n            \"Document already registered\"\r\n        );\r\n\r\n        documents[_fileHash] = Document({\r\n            exists: true,\r\n            owner: msg.sender,\r\n            timestamp: block.timestamp\r\n        });\r\n    }\r\n\r\n    function verifyDocument(\r\n        string memory _fileHash\r\n    ) public view returns (bool) {\r\n\r\n        return documents[_fileHash].exists;\r\n    }\r\n\r\n    function getDocumentInfo(\r\n        string memory _fileHash\r\n    )\r\n        public\r\n        view\r\n        returns (\r\n            bool exists,\r\n            address owner,\r\n            uint256 timestamp\r\n        )\r\n    {\r\n        Document memory doc = documents[_fileHash];\r\n\r\n        return (\r\n            doc.exists,\r\n            doc.owner,\r\n            doc.timestamp\r\n        );\r\n    }\r\n}"
+      }
+    }
+  }
+}
