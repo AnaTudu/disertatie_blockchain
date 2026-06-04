@@ -79,7 +79,7 @@ function App() {
     const exists = info[0];
 
     if (exists) {
-      setMessage("Acest document este deja înregistrat în blockchain.");
+      setMessage("Documentul este deja înregistrat în blockchain.");
       setStatus("warning");
       return;
     }
