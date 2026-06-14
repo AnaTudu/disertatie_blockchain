@@ -44,11 +44,11 @@ function App() {
     if (!window.ethereum) {
       throw new Error("MetaMask nu este instalat.");
     }
-
+    //conexiune aplicatie-blockchain prin MetaMask
     const provider = new ethers.BrowserProvider(window.ethereum);
     await provider.send("eth_requestAccounts", []);
 
-    const signer = await provider.getSigner();
+    const signer = await provider.getSigner(); 
     const userAddress = await signer.getAddress();
     setAccount(userAddress);
 

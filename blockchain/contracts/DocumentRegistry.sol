@@ -17,7 +17,7 @@ contract DocumentRegistry {
 
         require(
             !documents[_fileHash].exists,
-            "Document already registered"
+            "Document deja Inregistrat!"
         );
 
         documents[_fileHash] = Document({
