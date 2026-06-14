@@ -12,6 +12,7 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   
   const users = [
       {
@@ -343,19 +344,39 @@ if (!isLoggedIn) {
           }}
         />
 
-        <input
-          type="password"
-          placeholder="Parolă"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+                <div
           style={{
-            width: "100%",
-            padding: "12px",
-            marginBottom: "18px",
-            borderRadius: "8px",
-            border: "1px solid #cbd5e1"
+            position: "relative",
+            marginBottom: "18px"
           }}
-        />
+        >
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Parolă"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "12px",
+              borderRadius: "8px",
+              border: "1px solid #cbd5e1"
+            }}
+          />
+
+          <span
+            onClick={() => setShowPassword(!showPassword)}
+            style={{
+              position: "absolute",
+              right: "12px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              cursor: "pointer",
+              userSelect: "none"
+            }}
+          >
+            {showPassword ? "🙈" : "👁️"}
+          </span>
+        </div>
 
         <button
           onClick={loginWithMetaMask}
@@ -389,16 +410,44 @@ if (!isLoggedIn) {
 
   return (
     <div
-      style={{
+        style={{
         minHeight: "100vh",
         background: "linear-gradient(135deg, #1e3a8a, #6d28d9)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         fontFamily: "Arial, sans-serif",
-        padding: "30px"
+        padding: "30px",
+        position: "relative"
       }}
     >
+            <button
+        onClick={() => {
+          setIsLoggedIn(false);
+          setUsername("");
+          setPassword("");
+          setRole("");
+          setAccount("");
+          setMessage("");
+          setHash("");
+          setFile(null);
+        }}
+        style={{
+          position: "absolute",
+          top: "20px",
+          right: "20px",
+          padding: "10px 18px",
+          background: "transparent",
+          border: "2px solid white",
+          borderRadius: "12px",
+          color: "white",
+          fontWeight: "bold",
+          cursor: "pointer",
+          transition: "0.2s"
+        }}
+      >
+        ↩  Deconectare
+      </button>
       <div
         style={{
           width: "100%",
@@ -411,7 +460,7 @@ if (!isLoggedIn) {
       >
         <div style={{ textAlign: "center", marginBottom: "30px" }}>
           <h1 style={{ marginBottom: "10px", color: "#0f172a" }}>
-            Blockchain Document Verification
+            Verificarea Integrității Documentelor
           </h1>
           <p style={{ color: "#64748b", fontSize: "16px" }}>
             Aplicație web pentru verificarea integrității documentelor utilizând blockchain și smart contracts.
@@ -500,7 +549,7 @@ if (!isLoggedIn) {
                   fontSize: "15px"
                 }}
               >
-                Înregistrează document
+               💾 Înregistrează document
               </button>
             )}
 
@@ -517,7 +566,7 @@ if (!isLoggedIn) {
               fontSize: "15px"
             }}
           >
-            Verifică document
+           🔍 Verifică document
           </button>
         </div>
 
@@ -542,7 +591,7 @@ if (!isLoggedIn) {
             }}
           >
             <h3 style={{ marginTop: 0, color: "#0f172a" }}>
-              Hash SHA-256
+              🔐 Hash SHA-256
             </h3>
             <p
               style={{
@@ -571,7 +620,7 @@ if (!isLoggedIn) {
               borderRadius: "12px"
             }}
           >
-            <strong>Rețea:</strong>
+            <strong> ⛏️ Rețea:</strong>
             <p>Hardhat Local</p>
           </div>
 
@@ -582,7 +631,7 @@ if (!isLoggedIn) {
               borderRadius: "12px"
             }}
           >
-            <strong>Smart Contract:</strong>
+            <strong> ⚙️ Smart Contract:</strong>
             <p style={{ wordBreak: "break-all" }}>{shortContractAddress}</p>
           </div>
 
@@ -593,12 +642,12 @@ if (!isLoggedIn) {
               borderRadius: "12px"
             }}
           >
-            <strong>Wallet conectat:</strong>
+            <strong> 👛 Wallet conectat:</strong>
               <p style={{ wordBreak: "break-all" }}>
                 {account || "Neconectat"}
               </p>
 
-              <strong>Rol utilizator:</strong>
+              <strong> Rol utilizator:</strong>
               <p>
                 {role || "-"}
               </p>
