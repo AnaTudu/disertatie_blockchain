@@ -3,6 +3,8 @@ pragma solidity ^0.8.28;
 
 contract DocumentRegistry {
 
+    address public admin;
+
     struct Document {
         bool exists;
         address owner;
@@ -11,13 +13,25 @@ contract DocumentRegistry {
 
     mapping(string => Document) private documents;
 
+    constructor() {
+        admin = msg.sender;
+    }
+
+    modifier onlyAdmin() {
+        require(
+            msg.sender == admin,
+            "Doar administratorul are acces."
+        );
+        _;
+    }
+
     function registerDocument(
         string memory _fileHash
     ) public {
 
         require(
             !documents[_fileHash].exists,
-            "Document deja Inregistrat!"
+            "Document deja inregistrat!"
         );
 
         documents[_fileHash] = Document({
@@ -52,5 +66,13 @@ contract DocumentRegistry {
             doc.owner,
             doc.timestamp
         );
+    }
+
+    function getAdmin()
+        public
+        view
+        returns (address)
+    {
+        return admin;
     }
 }

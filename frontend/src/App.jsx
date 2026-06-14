@@ -8,15 +8,33 @@ function App() {
   const [status, setStatus] = useState("");
   const [account, setAccount] = useState("");
   const [lastValidInfo, setLastValidInfo] = useState(null);
+  const [role, setRole] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  
+  const users = [
+      {
+        username: "admin",
+        password: "admin123",
+        role: "Administrator"
+      },
+      {
+        username: "user",
+        password: "user123",
+        role: "Utilizator"
+      }
+    ];
 
   const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
   const shortContractAddress = contractAddress.substring(0, 6) + "..." + contractAddress.substring(contractAddress.length - 4);
 
   const abi = [
-    "function registerDocument(string memory _fileHash) public",
-    "function verifyDocument(string memory _fileHash) public view returns (bool)",
-    "function getDocumentInfo(string memory _fileHash) public view returns (bool,address,uint256)"
-  ];
+  "function registerDocument(string memory _fileHash) public",
+  "function verifyDocument(string memory _fileHash) public view returns (bool)",
+  "function getDocumentInfo(string memory _fileHash) public view returns (bool,address,uint256)",
+  "function getAdmin() public view returns (address)"
+];
 
   function handleFileChange(event) {
     setFile(event.target.files[0]);
@@ -40,24 +58,84 @@ function App() {
     );
   }
 }
+   async function loginWithMetaMask() {
+        const foundUser = users.find(
+          (user) =>
+            user.username === username &&
+            user.password === password
+        );
+
+        if (!foundUser) {
+          setMessage("Utilizator sau parolă incorectă.");
+          setStatus("error");
+          return;
+        }
+
+        try {
+          await window.ethereum.request({
+            method: "wallet_requestPermissions",
+            params: [{ eth_accounts: {} }]
+          });
+
+          await getContract(false);
+
+          if (foundUser.role === "Administrator") {
+            const contract = await getContract(false);
+            const adminAddress = await contract.getAdmin();
+
+            if (
+              account.toLowerCase() !==
+              adminAddress.toLowerCase()
+            ) {
+              setMessage(
+                "Pentru rolul de Administrator trebuie selectat wallet-ul principal din Hardhat."
+              );
+              setStatus("error");
+              return;
+            }
+          }
+
+          setRole(foundUser.role);
+          setIsLoggedIn(true);
+          setMessage("");
+          setStatus("");
+        } catch (error) {
+          setMessage(error.message);
+          setStatus("error");
+        }
+      }
   async function getContract(withSigner = false) {
-    if (!window.ethereum) {
-      throw new Error("MetaMask nu este instalat.");
-    }
-    //conexiune aplicatie-blockchain prin MetaMask
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);
-
-    const signer = await provider.getSigner(); 
-    const userAddress = await signer.getAddress();
-    setAccount(userAddress);
-
-    if (withSigner) {
-      return new ethers.Contract(contractAddress, abi, signer);
-    }
-
-    return new ethers.Contract(contractAddress, abi, provider);
+  if (!window.ethereum) {
+    throw new Error("MetaMask nu este instalat.");
   }
+
+  const provider = new ethers.BrowserProvider(window.ethereum);
+  await provider.send("eth_requestAccounts", []);
+
+  const signer = await provider.getSigner();
+  const userAddress = await signer.getAddress();
+
+  setAccount(userAddress);
+
+  const contract = new ethers.Contract(
+    contractAddress,
+    abi,
+    withSigner ? signer : provider
+  );
+
+  const adminAddress = await contract.getAdmin();
+
+  if (
+    userAddress.toLowerCase() ===
+    adminAddress.toLowerCase()
+  ) {
+    setRole("Administrator");
+  } else {
+    setRole("Utilizator");
+  }
+
+  return contract;
+}
 
   async function registerDocument() {
   if (!file) {
@@ -224,6 +302,90 @@ function App() {
         ? "#1e40af"
         : "#334155"
   };
+  
+if (!isLoggedIn) {
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        background: "linear-gradient(135deg, #1e3a8a, #6d28d9)"
+      }}
+    >
+      <div
+        style={{
+          width: "420px",
+          background: "white",
+          padding: "40px",
+          borderRadius: "20px",
+          textAlign: "center"
+        }}
+      >
+        <h1>Autentificare</h1>
+
+        <p>
+          Introdu numele de utilizator și parola, apoi conectează MetaMask.
+        </p>
+
+        <input
+          type="text"
+          placeholder="Nume utilizator"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "12px",
+            marginBottom: "12px",
+            borderRadius: "8px",
+            border: "1px solid #cbd5e1"
+          }}
+        />
+
+        <input
+          type="password"
+          placeholder="Parolă"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "12px",
+            marginBottom: "18px",
+            borderRadius: "8px",
+            border: "1px solid #cbd5e1"
+          }}
+        />
+
+        <button
+          onClick={loginWithMetaMask}
+          style={{
+            padding: "14px 24px",
+            border: "none",
+            borderRadius: "10px",
+            backgroundColor: "#2563eb",
+            color: "white",
+            fontWeight: "bold",
+            cursor: "pointer"
+          }}
+        >
+          Autentificare cu MetaMask
+        </button>
+
+        {message && (
+          <div
+            style={{
+              ...messageStyle,
+              marginTop: "20px"
+            }}
+          >
+            {message}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
   return (
     <div
@@ -324,6 +486,7 @@ function App() {
                 marginBottom: "20px"
               }}
             >
+              {role === "Administrator" && (
               <button
                 onClick={registerDocument}
                 style={{
@@ -337,8 +500,9 @@ function App() {
                   fontSize: "15px"
                 }}
               >
-            Înregistrează document
-          </button>
+                Înregistrează document
+              </button>
+            )}
 
           <button
             onClick={verifyDocument}
@@ -430,9 +594,14 @@ function App() {
             }}
           >
             <strong>Wallet conectat:</strong>
-            <p style={{ wordBreak: "break-all" }}>
-              {account || "Neconectat"}
-            </p>
+              <p style={{ wordBreak: "break-all" }}>
+                {account || "Neconectat"}
+              </p>
+
+              <strong>Rol utilizator:</strong>
+              <p>
+                {role || "-"}
+              </p>
           </div>
         </div>
       </div>
